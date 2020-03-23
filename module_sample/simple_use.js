@@ -3,7 +3,7 @@ const AnyProxy = require('../proxy');
 const options = {
   port: 8001,
   webInterface: {
-    enable: true
+    enable: false
   }
 };
 const proxyServer = new AnyProxy.ProxyServer(options);

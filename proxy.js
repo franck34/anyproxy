@@ -10,7 +10,6 @@ const http = require('http'),
   util = require('./lib/util'),
   events = require('events'),
   co = require('co'),
-  WebInterface = require('./lib/webInterface'),
   wsServerMgr = require('./lib/wsServerMgr'),
   ThrottleGroup = require('stream-throttle').ThrottleGroup;
 
@@ -193,11 +192,6 @@ class ProxyCore extends events.EventEmitter {
           const tipText = (self.proxyType === T_TYPE_HTTP ? 'Http' : 'Https') + ' proxy started on port ' + self.proxyPort;
           logUtil.printLog(color.green(tipText));
 
-          if (self.webServerInstance) {
-            const webTip = 'web interface started on port ' + self.webServerInstance.webPort;
-            logUtil.printLog(color.green(webTip));
-          }
-
           let ruleSummaryString = '';
           const ruleSummary = this.proxyRule.summary;
           if (ruleSummary) {
@@ -303,31 +297,14 @@ class ProxyServer extends ProxyCore {
 
     super(configForCore);
 
-    this.proxyWebinterfaceConfig = config.webInterface;
     this.recorder = recorder;
-    this.webServerInstance = null;
   }
 
   start() {
     if (this.recorder) {
       this.recorder.setDbAutoCompact();
-    }
-
-    // start web interface if neeeded
-    if (this.proxyWebinterfaceConfig && this.proxyWebinterfaceConfig.enable) {
-      this.webServerInstance = new WebInterface(this.proxyWebinterfaceConfig, this.recorder);
-      // start web server
-      this.webServerInstance.start()
-      // start proxy core
-        .then(() => {
-          super.start();
-        })
-        .catch((e) => {
-          this.emit('error', e);
-        });
-    } else {
-      super.start();
-    }
+  }
+    super.start();
   }
 
   close() {
@@ -343,12 +320,6 @@ class ProxyServer extends ProxyCore {
     return super.close()
       // release webInterface
       .then(() => {
-        if (self.webServerInstance) {
-          const tmpWebServer = self.webServerInstance;
-          self.webServerInstance = null;
-          logUtil.printLog('closing webInterface...');
-          return tmpWebServer.close();
-        }
       });
   }
 }
@@ -356,7 +327,6 @@ class ProxyServer extends ProxyCore {
 module.exports.ProxyCore = ProxyCore;
 module.exports.ProxyServer = ProxyServer;
 module.exports.ProxyRecorder = Recorder;
-module.exports.ProxyWebServer = WebInterface;
 module.exports.utils = {
   systemProxyMgr: require('./lib/systemProxyMgr'),
   certMgr,
