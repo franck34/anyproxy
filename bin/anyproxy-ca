@@ -60,7 +60,7 @@ if (program.clear) {
   co(certMgr.getCAStatus)
     .then(status => {
       if (!status.exist) {
-        console.log('AnyProxy CA does not exist.');
+        console.log('CA does not exist.');
         const questions = [{
           type: 'confirm',
           name: 'ifCreate',
@@ -74,9 +74,9 @@ if (program.clear) {
         });
       } else if (!status.trusted) {
         if (/^win/.test(process.platform)) {
-          console.log('AnyProxy CA exists, make sure it has been trusted');
+          console.log('CA exists, make sure it has been trusted');
         } else {
-          console.log('AnyProxy CA exists, but not be trusted');
+          console.log('CA exists, but not be trusted');
           const questions = [{
             type: 'confirm',
             name: 'ifGotoTrust',
@@ -91,7 +91,7 @@ if (program.clear) {
         }
         // AnyProxy.utils.certMgr.clearCerts()
       } else {
-        console.log(color.green('AnyProxy CA has already been trusted'));
+        console.log(color.green('CA has already been trusted'));
       }
     })
     .catch(e => {
